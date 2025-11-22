@@ -15,6 +15,34 @@ services:
     networks:
       - backend
 
+  postgres-user:
+    image: postgres:16
+    container_name: postgres-user
+    environment:
+      POSTGRES_DB: user_db
+      POSTGRES_USER: user_service
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_user_data:/var/lib/postgresql/data
+    networks:
+      - backend
+
+  postgres-account:
+    image: postgres:16
+    container_name: postgres-account
+    environment:
+      POSTGRES_DB: account_db
+      POSTGRES_USER: account_service
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_account_data:/var/lib/postgresql/data
+    networks:
+      - backend
+
   keycloak:
     image: quay.io/keycloak/keycloak:23.0
     container_name: keycloak
@@ -50,10 +78,12 @@ services:
     environment:
       QUARKUS_PROFILE: prod
       QUARKUS_OIDC_AUTH_SERVER_URL: http://keycloak:8180/realms/quarkus
+      QUARKUS_DATASOURCE_JDBC_URL: jdbc:postgresql://postgres-user:5432/user_db
     ports:
       - "8081:8081"
     depends_on:
       - keycloak
+      - postgres-user
     networks:
       - backend
 
@@ -66,11 +96,13 @@ services:
       QUARKUS_PROFILE: prod
       QUARKUS_OIDC_AUTH_SERVER_URL: http://keycloak:8180/realms/quarkus
       QUARKUS_REST_CLIENT_USER_SERVICE_URL: http://user-service:8081
+      QUARKUS_DATASOURCE_JDBC_URL: jdbc:postgresql://postgres-account:5432/account_db
     ports:
       - "8082:8082"
     depends_on:
       - keycloak
       - user-service
+      - postgres-account
     networks:
       - backend
 
@@ -137,3 +169,5 @@ networks:
 
 volumes:
   postgres_data:
+  postgres_user_data:
+  postgres_account_data:

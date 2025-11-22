@@ -1,21 +1,39 @@
 package ua.edu.university.model;
 
+import io.quarkus.hibernate.orm.panache.PanacheEntity;
+import jakarta.persistence.*;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
-public class Account {
-    private Long id;
+@Entity
+@Table(name = "accounts")
+public class Account extends PanacheEntity {
+
+    @Column(name = "user_id", nullable = false)
     private Long userId;
+
+    @Column(name = "account_number", nullable = false, unique = true)
     private String accountNumber;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "account_type", nullable = false)
     private AccountType accountType;
+
+    @Column(nullable = false)
     private BigDecimal balance;
+
+    @Column(nullable = false)
     private String currency;
+
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
     public enum AccountType {
-        CHECKING,    // Поточний рахунок
-        SAVINGS,     // Накопичувальний рахунок
-        INVESTMENT   // Інвестиційний рахунок
+        CHECKING,
+        SAVINGS,
+        INVESTMENT
     }
 
     public Account() {
@@ -24,8 +42,7 @@ public class Account {
         this.currency = "UAH";
     }
 
-    public Account(Long id, Long userId, String accountNumber, AccountType accountType, BigDecimal balance, String currency) {
-        this.id = id;
+    public Account(Long userId, String accountNumber, AccountType accountType, BigDecimal balance, String currency) {
         this.userId = userId;
         this.accountNumber = accountNumber;
         this.accountType = accountType;
@@ -34,12 +51,8 @@ public class Account {
         this.createdAt = LocalDateTime.now();
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
+    public static List<Account> findByUserId(Long userId) {
+        return list("userId", userId);
     }
 
     public Long getUserId() {

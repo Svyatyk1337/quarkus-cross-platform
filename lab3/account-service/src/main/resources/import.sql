@@ -1,0 +1,4 @@
+INSERT INTO accounts (id, user_id, account_number, account_type, balance, currency, created_at) VALUES (nextval('accounts_seq'), 1, 'UA123456789012345678901234567', 'CHECKING', 15000.00, 'UAH', CURRENT_TIMESTAMP);
+INSERT INTO accounts (id, user_id, account_number, account_type, balance, currency, created_at) VALUES (nextval('accounts_seq'), 1, 'UA987654321098765432109876543', 'SAVINGS', 50000.00, 'UAH', CURRENT_TIMESTAMP);
+INSERT INTO accounts (id, user_id, account_number, account_type, balance, currency, created_at) VALUES (nextval('accounts_seq'), 2, 'UA111222333444555666777888999', 'CHECKING', 8500.50, 'UAH', CURRENT_TIMESTAMP);
+INSERT INTO accounts (id, user_id, account_number, account_type, balance, currency, created_at) VALUES (nextval('accounts_seq'), 3, 'UA999888777666555444333222111', 'INVESTMENT', 100000.00, 'USD', CURRENT_TIMESTAMP);

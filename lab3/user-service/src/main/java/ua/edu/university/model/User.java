@@ -1,34 +1,40 @@
 package ua.edu.university.model;
 
+import io.quarkus.hibernate.orm.panache.PanacheEntity;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.persistence.Column;
+
 import java.time.LocalDateTime;
 
-public class User {
-    private Long id;
+@Entity
+@Table(name = "users")
+public class User extends PanacheEntity {
+
+    @Column(name = "first_name", nullable = false)
     private String firstName;
+
+    @Column(name = "last_name", nullable = false)
     private String lastName;
+
+    @Column(nullable = false, unique = true)
     private String email;
+
     private String phone;
+
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
     public User() {
         this.createdAt = LocalDateTime.now();
     }
 
-    public User(Long id, String firstName, String lastName, String email, String phone) {
-        this.id = id;
+    public User(String firstName, String lastName, String email, String phone) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.phone = phone;
         this.createdAt = LocalDateTime.now();
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public String getFirstName() {

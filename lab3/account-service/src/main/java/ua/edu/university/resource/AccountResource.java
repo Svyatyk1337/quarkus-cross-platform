@@ -2,13 +2,13 @@ package ua.edu.university.resource;
 
 import io.quarkus.security.Authenticated;
 import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import ua.edu.university.client.UserServiceClient;
 import ua.edu.university.model.Account;
-import ua.edu.university.repository.AccountRepository;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -20,34 +20,33 @@ import java.util.List;
 public class AccountResource {
 
     @Inject
-    AccountRepository accountRepository;
-
-    @Inject
     @RestClient
     UserServiceClient userServiceClient;
 
     @GET
     public List<Account> getAllAccounts() {
-        return accountRepository.findAll();
+        return Account.listAll();
     }
 
     @GET
     @Path("/{id}")
     public Response getAccountById(@PathParam("id") Long id) {
-        return accountRepository.findById(id)
-                .map(account -> Response.ok(account).build())
-                .orElse(Response.status(Response.Status.NOT_FOUND).build());
+        Account account = Account.findById(id);
+        if (account == null) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+        return Response.ok(account).build();
     }
 
     @GET
     @Path("/user/{userId}")
     public List<Account> getAccountsByUserId(@PathParam("userId") Long userId) {
-        return accountRepository.findByUserId(userId);
+        return Account.findByUserId(userId);
     }
 
     @POST
+    @Transactional
     public Response createAccount(Account account) {
-        // Перевірка чи існує користувач через REST Client
         try {
             UserServiceClient.ExistsResponse response = userServiceClient.checkUserExists(account.getUserId());
             if (!response.exists) {
@@ -61,22 +60,27 @@ public class AccountResource {
                     .build();
         }
 
-        Account created = accountRepository.createAccount(account);
-        return Response.status(Response.Status.CREATED).entity(created).build();
+        account.persist();
+        return Response.status(Response.Status.CREATED).entity(account).build();
     }
 
     @PUT
     @Path("/{id}/balance")
+    @Transactional
     public Response updateBalance(@PathParam("id") Long id, BalanceUpdateRequest request) {
-        return accountRepository.updateBalance(id, request.newBalance)
-                .map(updated -> Response.ok(updated).build())
-                .orElse(Response.status(Response.Status.NOT_FOUND).build());
+        Account account = Account.findById(id);
+        if (account == null) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+        account.setBalance(request.newBalance);
+        return Response.ok(account).build();
     }
 
     @DELETE
     @Path("/{id}")
+    @Transactional
     public Response deleteAccount(@PathParam("id") Long id) {
-        boolean deleted = accountRepository.deleteAccount(id);
+        boolean deleted = Account.deleteById(id);
         if (deleted) {
             return Response.noContent().build();
         }
@@ -86,7 +90,7 @@ public class AccountResource {
     @GET
     @Path("/{id}/exists")
     public Response checkAccountExists(@PathParam("id") Long id) {
-        boolean exists = accountRepository.existsById(id);
+        boolean exists = Account.findById(id) != null;
         return Response.ok().entity(new ExistsResponse(exists)).build();
     }
 
