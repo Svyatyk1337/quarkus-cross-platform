@@ -1,0 +1,56 @@
+{#include base}
+    {#title}Transactions - Banking System{/title}
+    {#content}
+        <h2 style="margin-bottom: 20px; color: #333;">
+            {#if accountId}
+                Transactions for Account #{accountId}
+            {#else}
+                All Transactions
+            {/if}
+        </h2>
+        {#if error}
+            <div class="error">{error}</div>
+        {/if}
+        {#if accountId}
+            <p style="margin-bottom: 15px;">
+                <a href="/transactions" style="color: #667eea; text-decoration: none; font-weight: 500;">&larr; Back to all transactions</a>
+            </p>
+        {/if}
+        {#if transactions}
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Account ID</th>
+                        <th>Type</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Created At</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {#for transaction in transactions}
+                        <tr>
+                            <td>{transaction.id}</td>
+                            <td>{transaction.accountId}</td>
+                            <td>{transaction.type}</td>
+                            <td>{transaction.amount}</td>
+                            <td>
+                                {#if transaction.status == 'COMPLETED'}
+                                    <span class="badge badge-success">{transaction.status}</span>
+                                {#else if transaction.status == 'PENDING'}
+                                    <span class="badge badge-pending">{transaction.status}</span>
+                                {#else}
+                                    <span class="badge badge-failed">{transaction.status}</span>
+                                {/if}
+                            </td>
+                            <td>{transaction.createdAt}</td>
+                        </tr>
+                    {/for}
+                </tbody>
+            </table>
+        {#else}
+            <p>No transactions found.</p>
+        {/if}
+    {/content}
+{/include}

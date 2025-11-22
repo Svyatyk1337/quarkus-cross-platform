@@ -1,0 +1,31 @@
+{#include base}
+    {#title}Home - Banking System{/title}
+    {#content}
+        <h2 style="margin-bottom: 20px; color: #333;">Welcome to Banking System</h2>
+        <p style="font-size: 18px; color: #666; line-height: 1.8;">
+            This is a microservices-based banking application secured with OpenID Connect (OIDC).
+        </p>
+        <div style="margin-top: 40px; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 12px; color: white;">
+                <h3 style="margin-bottom: 10px;">Users</h3>
+                <p style="opacity: 0.9;">Manage system users</p>
+                <a href="/users" style="display: inline-block; margin-top: 15px; padding: 10px 20px; background: white; color: #667eea; text-decoration: none; border-radius: 6px; font-weight: 600;">View Users</a>
+            </div>
+            <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); padding: 30px; border-radius: 12px; color: white;">
+                <h3 style="margin-bottom: 10px;">Accounts</h3>
+                <p style="opacity: 0.9;">View bank accounts</p>
+                <a href="/accounts" style="display: inline-block; margin-top: 15px; padding: 10px 20px; background: white; color: #f5576c; text-decoration: none; border-radius: 6px; font-weight: 600;">View Accounts</a>
+            </div>
+            <div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); padding: 30px; border-radius: 12px; color: white;">
+                <h3 style="margin-bottom: 10px;">Transactions</h3>
+                <p style="opacity: 0.9;">Track all transactions</p>
+                <a href="/transactions" style="display: inline-block; margin-top: 15px; padding: 10px 20px; background: white; color: #00f2fe; text-decoration: none; border-radius: 6px; font-weight: 600;">View Transactions</a>
+            </div>
+            <div style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); padding: 30px; border-radius: 12px; color: white;">
+                <h3 style="margin-bottom: 10px;">Payments</h3>
+                <p style="opacity: 0.9;">Manage payments</p>
+                <a href="/payments" style="display: inline-block; margin-top: 15px; padding: 10px 20px; background: white; color: #fa709a; text-decoration: none; border-radius: 6px; font-weight: 600;">View Payments</a>
+            </div>
+        </div>
+    {/content}
+{/include}

@@ -1,0 +1,51 @@
+{#include base}
+    {#title}Accounts - Banking System{/title}
+    {#content}
+        <h2 style="margin-bottom: 20px; color: #333;">
+            {#if userId}
+                Accounts for User #{userId}
+            {#else}
+                All Accounts
+            {/if}
+        </h2>
+        {#if error}
+            <div class="error">{error}</div>
+        {/if}
+        {#if userId}
+            <p style="margin-bottom: 15px;">
+                <a href="/accounts" style="color: #667eea; text-decoration: none; font-weight: 500;">&larr; Back to all accounts</a>
+            </p>
+        {/if}
+        {#if accounts}
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>User ID</th>
+                        <th>Account Number</th>
+                        <th>Balance</th>
+                        <th>Currency</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {#for account in accounts}
+                        <tr>
+                            <td>{account.id}</td>
+                            <td>{account.userId}</td>
+                            <td>{account.accountNumber}</td>
+                            <td>{account.balance}</td>
+                            <td>{account.currency}</td>
+                            <td>
+                                <a href="/transactions/account/{account.id}" style="color: #667eea; text-decoration: none; margin-right: 15px; font-weight: 500;">Transactions</a>
+                                <a href="/payments/account/{account.id}" style="color: #f5576c; text-decoration: none; font-weight: 500;">Payments</a>
+                            </td>
+                        </tr>
+                    {/for}
+                </tbody>
+            </table>
+        {#else}
+            <p>No accounts found.</p>
+        {/if}
+    {/content}
+{/include}
