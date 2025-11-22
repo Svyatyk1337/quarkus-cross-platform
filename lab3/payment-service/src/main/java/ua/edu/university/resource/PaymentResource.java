@@ -32,15 +32,17 @@ public class PaymentResource {
 
     @GET
     public List<Payment> getAllPayments() {
-        return paymentRepository.findAll();
+        return paymentRepository.listAll();
     }
 
     @GET
     @Path("/{id}")
     public Response getPaymentById(@PathParam("id") Long id) {
-        return paymentRepository.findById(id)
-                .map(payment -> Response.ok(payment).build())
-                .orElse(Response.status(Response.Status.NOT_FOUND).build());
+        Payment payment = paymentRepository.findById(id);
+        if (payment != null) {
+            return Response.ok(payment).build();
+        }
+        return Response.status(Response.Status.NOT_FOUND).build();
     }
 
     @GET
@@ -50,8 +52,8 @@ public class PaymentResource {
     }
 
     @POST
+    @jakarta.transaction.Transactional
     public Response createPayment(Payment payment) {
-        // 1. Перевірка рахунків через REST (Account Service)
         try {
             AccountServiceClient.ExistsResponse fromAccountExists =
                     accountServiceClient.checkAccountExists(payment.getFromAccountId());
@@ -74,53 +76,52 @@ public class PaymentResource {
                     .build();
         }
 
-        // 2. Створення платежу
         payment.setStatus(Payment.PaymentStatus.PROCESSING);
-        Payment created = paymentRepository.createPayment(payment);
+        paymentRepository.persist(payment);
 
-        // 3. Створення транзакції через gRPC (Transaction Service)
         try {
             CreateTransactionRequest grpcRequest = CreateTransactionRequest.newBuilder()
                     .setAccountId(payment.getFromAccountId())
                     .setType("PAYMENT")
                     .setAmount(payment.getAmount().toString())
                     .setCurrency(payment.getCurrency())
-                    .setDescription("Payment #" + created.getId() + ": " + payment.getDescription())
+                    .setDescription("Payment #" + payment.getId() + ": " + payment.getDescription())
                     .build();
 
             TransactionResponse transactionResponse = transactionService
                     .createTransaction(grpcRequest)
                     .await().indefinitely();
 
-            // Оновлення платежу з ID транзакції
-            created.setTransactionId(transactionResponse.getId());
-            created.setStatus(Payment.PaymentStatus.COMPLETED);
-            paymentRepository.updateTransactionId(created.getId(), transactionResponse.getId());
-            paymentRepository.updateStatus(created.getId(), Payment.PaymentStatus.COMPLETED);
+            payment.setTransactionId(transactionResponse.getId());
+            payment.setStatus(Payment.PaymentStatus.COMPLETED);
 
         } catch (Exception e) {
-            created.setStatus(Payment.PaymentStatus.FAILED);
-            paymentRepository.updateStatus(created.getId(), Payment.PaymentStatus.FAILED);
+            payment.setStatus(Payment.PaymentStatus.FAILED);
             return Response.status(Response.Status.SERVICE_UNAVAILABLE)
                     .entity(new ErrorResponse("Transaction service is unavailable: " + e.getMessage()))
                     .build();
         }
 
-        return Response.status(Response.Status.CREATED).entity(created).build();
+        return Response.status(Response.Status.CREATED).entity(payment).build();
     }
 
     @PUT
     @Path("/{id}/status")
+    @jakarta.transaction.Transactional
     public Response updatePaymentStatus(@PathParam("id") Long id, StatusUpdateRequest request) {
-        return paymentRepository.updateStatus(id, request.status)
-                .map(updated -> Response.ok(updated).build())
-                .orElse(Response.status(Response.Status.NOT_FOUND).build());
+        Payment payment = paymentRepository.findById(id);
+        if (payment != null) {
+            payment.setStatus(request.status);
+            return Response.ok(payment).build();
+        }
+        return Response.status(Response.Status.NOT_FOUND).build();
     }
 
     @DELETE
     @Path("/{id}")
+    @jakarta.transaction.Transactional
     public Response deletePayment(@PathParam("id") Long id) {
-        boolean deleted = paymentRepository.deletePayment(id);
+        boolean deleted = paymentRepository.deleteById(id);
         if (deleted) {
             return Response.noContent().build();
         }

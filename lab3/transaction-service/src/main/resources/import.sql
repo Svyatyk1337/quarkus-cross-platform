@@ -1,0 +1,6 @@
+INSERT INTO transactions (id, account_id, type, amount, currency, status, description, created_at) VALUES (nextval('transactions_seq'), 1, 'DEPOSIT', 5000.00, 'UAH', 'COMPLETED', 'Поповнення рахунку', CURRENT_TIMESTAMP);
+INSERT INTO transactions (id, account_id, type, amount, currency, status, description, created_at) VALUES (nextval('transactions_seq'), 1, 'WITHDRAWAL', 1000.00, 'UAH', 'COMPLETED', 'Зняття готівки', CURRENT_TIMESTAMP);
+INSERT INTO transactions (id, account_id, type, amount, currency, status, description, created_at) VALUES (nextval('transactions_seq'), 2, 'PAYMENT', 500.50, 'UAH', 'COMPLETED', 'Оплата послуг', CURRENT_TIMESTAMP);
+INSERT INTO transactions (id, account_id, type, amount, currency, status, description, created_at) VALUES (nextval('transactions_seq'), 3, 'TRANSFER', 10000.00, 'UAH', 'PENDING', 'Переказ коштів', CURRENT_TIMESTAMP);
+INSERT INTO transactions (id, account_id, type, amount, currency, status, description, created_at) VALUES (nextval('transactions_seq'), 1, 'DEPOSIT', 2500.00, 'UAH', 'COMPLETED', 'Зарахування від роботодавця', CURRENT_TIMESTAMP);
+INSERT INTO transactions (id, account_id, type, amount, currency, status, description, created_at) VALUES (nextval('transactions_seq'), 2, 'WITHDRAWAL', 300.00, 'UAH', 'COMPLETED', 'Зняття в банкоматі', CURRENT_TIMESTAMP);

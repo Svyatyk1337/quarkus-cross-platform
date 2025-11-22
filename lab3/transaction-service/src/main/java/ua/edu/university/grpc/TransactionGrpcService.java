@@ -24,9 +24,9 @@ public class TransactionGrpcService implements TransactionService {
     AccountServiceClient accountServiceClient;
 
     @Override
+    @jakarta.transaction.Transactional
     public Uni<TransactionResponse> createTransaction(CreateTransactionRequest request) {
         return Uni.createFrom().item(() -> {
-            // Перевірка чи існує рахунок
             try {
                 AccountServiceClient.ExistsResponse response =
                         accountServiceClient.checkAccountExists(request.getAccountId());
@@ -48,20 +48,22 @@ public class TransactionGrpcService implements TransactionService {
             transaction.setCurrency(request.getCurrency());
             transaction.setDescription(request.getDescription());
 
-            Transaction created = transactionRepository.createTransaction(transaction);
-            return mapToResponse(created);
+            transactionRepository.persist(transaction);
+            return mapToResponse(transaction);
         });
     }
 
     @Override
     public Uni<TransactionResponse> getTransaction(GetTransactionRequest request) {
-        return Uni.createFrom().item(() ->
-                transactionRepository.findById(request.getId())
-                        .map(this::mapToResponse)
-                        .orElseThrow(() -> Status.NOT_FOUND
-                                .withDescription("Transaction not found")
-                                .asRuntimeException())
-        );
+        return Uni.createFrom().item(() -> {
+            Transaction transaction = transactionRepository.findById(request.getId());
+            if (transaction == null) {
+                throw Status.NOT_FOUND
+                        .withDescription("Transaction not found")
+                        .asRuntimeException();
+            }
+            return mapToResponse(transaction);
+        });
     }
 
     @Override
@@ -79,15 +81,18 @@ public class TransactionGrpcService implements TransactionService {
     }
 
     @Override
+    @jakarta.transaction.Transactional
     public Uni<TransactionResponse> updateTransactionStatus(UpdateStatusRequest request) {
-        return Uni.createFrom().item(() ->
-                transactionRepository.updateStatus(request.getId(),
-                                Transaction.TransactionStatus.valueOf(request.getStatus()))
-                        .map(this::mapToResponse)
-                        .orElseThrow(() -> Status.NOT_FOUND
-                                .withDescription("Transaction not found")
-                                .asRuntimeException())
-        );
+        return Uni.createFrom().item(() -> {
+            Transaction transaction = transactionRepository.findById(request.getId());
+            if (transaction == null) {
+                throw Status.NOT_FOUND
+                        .withDescription("Transaction not found")
+                        .asRuntimeException();
+            }
+            transaction.setStatus(Transaction.TransactionStatus.valueOf(request.getStatus()));
+            return mapToResponse(transaction);
+        });
     }
 
     private TransactionResponse mapToResponse(Transaction transaction) {

@@ -27,15 +27,17 @@ public class TransactionResource {
 
     @GET
     public List<Transaction> getAllTransactions() {
-        return transactionRepository.findAll();
+        return transactionRepository.listAll();
     }
 
     @GET
     @Path("/{id}")
     public Response getTransactionById(@PathParam("id") Long id) {
-        return transactionRepository.findById(id)
-                .map(transaction -> Response.ok(transaction).build())
-                .orElse(Response.status(Response.Status.NOT_FOUND).build());
+        Transaction transaction = transactionRepository.findById(id);
+        if (transaction != null) {
+            return Response.ok(transaction).build();
+        }
+        return Response.status(Response.Status.NOT_FOUND).build();
     }
 
     @GET
@@ -45,8 +47,8 @@ public class TransactionResource {
     }
 
     @POST
+    @jakarta.transaction.Transactional
     public Response createTransaction(Transaction transaction) {
-        // Перевірка чи існує рахунок через REST Client
         try {
             AccountServiceClient.ExistsResponse response =
                     accountServiceClient.checkAccountExists(transaction.getAccountId());
@@ -61,22 +63,27 @@ public class TransactionResource {
                     .build();
         }
 
-        Transaction created = transactionRepository.createTransaction(transaction);
-        return Response.status(Response.Status.CREATED).entity(created).build();
+        transactionRepository.persist(transaction);
+        return Response.status(Response.Status.CREATED).entity(transaction).build();
     }
 
     @PUT
     @Path("/{id}/status")
+    @jakarta.transaction.Transactional
     public Response updateTransactionStatus(@PathParam("id") Long id, StatusUpdateRequest request) {
-        return transactionRepository.updateStatus(id, request.status)
-                .map(updated -> Response.ok(updated).build())
-                .orElse(Response.status(Response.Status.NOT_FOUND).build());
+        Transaction transaction = transactionRepository.findById(id);
+        if (transaction != null) {
+            transaction.setStatus(request.status);
+            return Response.ok(transaction).build();
+        }
+        return Response.status(Response.Status.NOT_FOUND).build();
     }
 
     @DELETE
     @Path("/{id}")
+    @jakarta.transaction.Transactional
     public Response deleteTransaction(@PathParam("id") Long id) {
-        boolean deleted = transactionRepository.deleteTransaction(id);
+        boolean deleted = transactionRepository.deleteById(id);
         if (deleted) {
             return Response.noContent().build();
         }

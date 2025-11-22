@@ -1,30 +1,51 @@
 package ua.edu.university.model;
 
+import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+@Entity
+@Table(name = "transactions")
 public class Transaction {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "account_id", nullable = false)
     private Long accountId;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private TransactionType type;
+
+    @Column(nullable = false)
     private BigDecimal amount;
+
+    @Column(nullable = false)
     private String currency;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private TransactionStatus status;
+
     private String description;
+
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
     public enum TransactionType {
-        DEPOSIT,      // Поповнення
-        WITHDRAWAL,   // Зняття
-        TRANSFER,     // Переказ
-        PAYMENT       // Платіж
+        DEPOSIT,
+        WITHDRAWAL,
+        TRANSFER,
+        PAYMENT
     }
 
     public enum TransactionStatus {
-        PENDING,      // Очікує обробки
-        COMPLETED,    // Завершено
-        FAILED,       // Не вдалося
-        CANCELLED     // Скасовано
+        PENDING,
+        COMPLETED,
+        FAILED,
+        CANCELLED
     }
 
     public Transaction() {
@@ -33,9 +54,8 @@ public class Transaction {
         this.currency = "UAH";
     }
 
-    public Transaction(Long id, Long accountId, TransactionType type, BigDecimal amount,
+    public Transaction(Long accountId, TransactionType type, BigDecimal amount,
                        String currency, TransactionStatus status, String description) {
-        this.id = id;
         this.accountId = accountId;
         this.type = type;
         this.amount = amount;
